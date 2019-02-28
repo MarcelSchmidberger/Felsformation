@@ -11,7 +11,9 @@ let tags = new Set();
 let images = lines.map((line, index) => {
   let splitLine = line.split(' ');
   let localTags = splitLine.slice(2);
-  localTags.forEach(localTag => tags.add(localTag));
+  localTags.forEach(localTag => {
+    tags.add(localTag);
+  });
   return {
     index,
     freeToUse: true,
@@ -22,6 +24,7 @@ let images = lines.map((line, index) => {
   };
 });
 
+let tagMap = {};
 let newImages = [];
 let lastV = null;
 images.forEach((img) => {
@@ -29,6 +32,10 @@ images.forEach((img) => {
     if (lastV) {
       img.tags.push(...(lastV.tags));
       img['oldIndices'] = [lastV.index, img.index];
+      img.tags.forEach(tag => {
+        if (!tagMap[tag]) tagMap[tag] = [newImages.length];
+        else tagMap[tag].push(newImages.length);
+      });
       newImages.push(img);
       lastV = null;
     } else {
@@ -36,19 +43,30 @@ images.forEach((img) => {
     }
   } else {
     img['oldIndices'] = [img.index];
+    img.tags.forEach(tag => {
+      if (!tagMap[tag]) tagMap[tag] = [newImages.length];
+      else tagMap[tag].push(newImages.length);
+    });
     newImages.push(img);
   }
 });
 
+
+print("start NewImages");
 images = newImages.map((img, index) => {
   img.index = index;
   return img;
 });
 
-let tagMap = {};
-for (let tag of tags) {
+//let tagMap = {};
+
+print("start tagMap");
+/*for (let tag of tags) {
+  print(tag);
   tagMap[tag] = images.filter(a => a.tags.includes(tag)).map(a => a.index);
-}
+}*/
+
+print("completed preprocessing");
 
 const fitnessFunc = (img1, img2) => {
   const common = img1.tags.filter(tag => img2.tags.includes(tag));
@@ -62,6 +80,7 @@ let presentation = [];
 
 let next = images[0];
 while (next) {
+  print(next.index);
   let connectedImagesIndices = new Set();
   for (let tag of next.tags) {
     let imageTags = tagMap[tag];
@@ -87,7 +106,7 @@ while (next) {
       break;
     }
   }
-  if (!found) next = images.filter(img => img.freeToUse)[0];
+  if (!found) next = images.find(img => img.freeToUse);
 }
 
 let score = presentation.reduce((score, newDings, index) => {
