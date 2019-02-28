@@ -1,5 +1,5 @@
 const fs = require('fs');
-const file = 'c_memorable_moments';
+const file = 'd_pet_pictures';
 const print = (stuff) => {
   console.log(stuff);
 };
@@ -79,8 +79,10 @@ const fitnessFunc = (img1, img2) => {
 let presentation = [];
 
 let next = images[0];
+let count = 0;
 while (next) {
-  print(next.index);
+  count++;
+  if (count % 100) print(count);
   let connectedImagesIndices = new Set();
   for (let tag of next.tags) {
     let imageTags = tagMap[tag];
