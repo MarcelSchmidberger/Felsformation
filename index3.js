@@ -1,9 +1,9 @@
 const fs = require('fs');
-const file = 'a_example';
+
 const print = (stuff) => {
   console.log(stuff);
 };
-let fileContents = fs.readFileSync(file + '.txt', { encoding: 'utf8' });
+let fileContents = fs.readFileSync('a_example.txt', { encoding: 'utf8' });
 let lines = fileContents.split('\n');
 lines.pop();
 let firstLine = lines.shift();
@@ -45,7 +45,6 @@ images = newImages.map((img, index) => {
   return img;
 });
 
-images = images.reverse();
 console.log(images.length);
 
 let tagMap = {};
@@ -73,15 +72,18 @@ for (let image of images) {
     });
   }
   connectedImagesIndices = Array.from(connectedImagesIndices);
+  /*let imgsWithFitness = connectedImagesIndices.map(cII => { return { img: cII, fitness: fitnessFunc(image, images[cII])}});
+  let sorted = imgsWithFitness((a, b) => { return a.fitness > b.fitness });*/
+
   let sortedIndices = connectedImagesIndices.sort((img1Index, img2Index) => {
     let image1 = images[img1Index];
     let image2 = images[img2Index];
     let result1 = fitnessFunc(image, images[img1Index]);
     let result2 = fitnessFunc(image, images[img2Index]);
-    // return result1 < result2;
     return result2 - result1;
   });
 
+  //for (let sortedImgIndex of sorted.map(s => s.index)) {
   for (let sortedImgIndex of sortedIndices) {
     if (images[sortedImgIndex].freeToUse) {
       //print(fitnessFunc(images[sortedImgIndex], image));
@@ -105,4 +107,5 @@ print(score);
 const result = presentation.length + '\n' + presentation.map(p => {
   return images[p].oldIndices.join(' ')
 }).join('\n');
-fs.writeFileSync(file + '_abgabe.txt', result);
+//console.log(result);
+fs.writeFileSync('test.txt', result);

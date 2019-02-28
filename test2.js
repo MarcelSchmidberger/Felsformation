@@ -1,9 +1,9 @@
 const fs = require('fs');
-const file = 'a_example';
+
 const print = (stuff) => {
   console.log(stuff);
 };
-let fileContents = fs.readFileSync(file + '.txt', { encoding: 'utf8' });
+let fileContents = fs.readFileSync('d_pet_pictures.txt', { encoding: 'utf8' });
 let lines = fileContents.split('\n');
 lines.pop();
 let firstLine = lines.shift();
@@ -16,38 +16,9 @@ let images = lines.map((line, index) => {
     index,
     freeToUse: true,
     orientation: splitLine[0],
-    tags: localTags,
-    otherV: null,
-    oldIndices: null
+    tags: localTags
   };
 });
-
-let newImages = [];
-let lastV = null;
-images.forEach((img) => {
-  if (img.orientation === 'V') {
-    if (lastV) {
-      img.tags.push(...(lastV.tags));
-      img['oldIndices'] = [lastV.index, img.index];
-      newImages.push(img);
-      lastV = null;
-    } else {
-      lastV = img
-    }
-  } else {
-    img['oldIndices'] = [img.index];
-    newImages.push(img);
-  }
-});
-
-images = newImages.map((img, index) => {
-  img.index = index;
-  return img;
-});
-
-images = images.reverse();
-console.log(images.length);
-
 let tagMap = {};
 for (let tag of tags) {
   tagMap[tag] = images.filter(a => a.tags.includes(tag)).map(a => a.index);
@@ -63,7 +34,18 @@ const fitnessFunc = (img1, img2) => {
 
 let presentation = [];
 
+let beginTimeStamp = Date.now();
+let numImages = images.length;
+const updateCounter = (newValue) => {
+  if (newValue % 10) return;
+  let currentProgress = newValue / numImages;
+  let newDate = Date.now();
+  let processTime = newDate - beginTimeStamp;
+  print(processTime * (numImages / newValue));
+};
+
 for (let image of images) {
+  updateCounter(image.index);
   let connectedImagesIndices = new Set();
   for (let tag of image.tags) {
     let imageTags = tagMap[tag];
@@ -78,31 +60,14 @@ for (let image of images) {
     let image2 = images[img2Index];
     let result1 = fitnessFunc(image, images[img1Index]);
     let result2 = fitnessFunc(image, images[img2Index]);
-    // return result1 < result2;
-    return result2 - result1;
+    return result1 > result2;
   });
 
   for (let sortedImgIndex of sortedIndices) {
     if (images[sortedImgIndex].freeToUse) {
-      //print(fitnessFunc(images[sortedImgIndex], image));
       images[sortedImgIndex].freeToUse = false;
       presentation.push(sortedImgIndex);
       break;
     }
   }
 }
-
-let score = presentation.reduce((score, newDings, index) => {
-  let image = images[newDings];
-  let image2 = images[presentation[index + 1]];
-  if (image && image2) {
-    return score + fitnessFunc(image, image2);
-  } else return score;
-});
-
-print(score);
-
-const result = presentation.length + '\n' + presentation.map(p => {
-  return images[p].oldIndices.join(' ')
-}).join('\n');
-fs.writeFileSync(file + '_abgabe.txt', result);

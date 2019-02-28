@@ -4,7 +4,9 @@
   "description": "Google Hashcode 2019 Practice",
   "main": "index.js",
   "scripts": {
+    "start2": "node $NODE_DEBUG_OPTION ./index3.js",
     "start": "node $NODE_DEBUG_OPTION ./index.js",
+    "blubber": "node $NODE_DEBUG_OPTION ./test2.js",
     "startIt": "node ./index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
